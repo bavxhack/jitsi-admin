@@ -1813,3 +1813,134 @@ a:hover {
   }
 
 }
+.dashboard-modern {
+  .nav-mat-tabs {
+    background: linear-gradient(135deg, #f8fbff, #eef5ff);
+    border: 1px solid #dbe8ff;
+    border-radius: 18px;
+    padding: 6px;
+    box-shadow: 0 18px 40px rgba(34, 80, 156, 0.08);
+
+    .nav-mat-item {
+      border-radius: 12px;
+      transition: all 0.25s ease;
+
+      &.mat-active {
+        background: linear-gradient(120deg, #ffffff, #edf4ff);
+        box-shadow: 0 8px 22px rgba(34, 80, 156, 0.15);
+      }
+    }
+
+    .nav-mat-link {
+      color: #1f3f67;
+      font-weight: 600;
+    }
+  }
+
+  .btn-dashboard {
+    border-radius: 14px;
+    font-weight: 600;
+    box-shadow: 0 14px 24px rgba(39, 104, 188, 0.16);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 30px rgba(39, 104, 188, 0.22);
+    }
+  }
+
+  .card {
+    border: 1px solid #dfebff;
+    background: linear-gradient(150deg, #ffffff, #f8fbff);
+    box-shadow: 0 18px 34px rgba(33, 76, 145, 0.1);
+  }
+
+  .triggerHide {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+
+    &.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.dashboard-intro {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid #d7e5ff;
+  background: linear-gradient(130deg, #fcfeff 0%, #eef4ff 60%, #e8f2ff 100%);
+  padding: 22px;
+  box-shadow: 0 16px 32px rgba(28, 77, 154, 0.12);
+  animation: introSlideIn 0.55s ease-out;
+
+  .dashboard-intro__content {
+    position: relative;
+    z-index: 2;
+    max-width: 72ch;
+  }
+
+  .dashboard-intro__badge {
+    margin-bottom: 8px;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #e4efff;
+    color: #255188;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .dashboard-intro__title {
+    color: #19385e;
+    margin: 0 0 10px;
+    font-size: clamp(1.25rem, 2.2vw, 1.8rem);
+  }
+
+  .dashboard-intro__text {
+    margin: 0;
+    color: #335781;
+    line-height: 1.65;
+    font-size: 0.98rem;
+  }
+
+  .dashboard-intro__glow {
+    position: absolute;
+    left: var(--intro-glow-x, 82%);
+    top: var(--intro-glow-y, 14%);
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(115, 171, 255, 0.42), transparent 70%);
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    animation: softPulse 4.5s ease-in-out infinite;
+  }
+}
+
+@keyframes introSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+  }
+}
