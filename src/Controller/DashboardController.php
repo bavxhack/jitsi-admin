@@ -113,7 +113,7 @@ class DashboardController extends JitsiAdminController
         $roomsPast = $this->doctrine->getRepository(Rooms::class)->findRoomsInPast($this->getUser(), 0);
         $roomsNow = $this->doctrine->getRepository(Rooms::class)->findRuningRooms($this->getUser());
         $roomsToday = $this->doctrine->getRepository(Rooms::class)->findTodayRooms($this->getUser());
-        $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), 0);
+        $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), 0, true);
         $servers = $serverUserManagment->getServersFromUser($this->getUser());
         $today = (new \DateTime('now'))->setTimezone(new \DateTimeZone($this->getUser()->getTimeZone()));
         $tomorrow = (clone $today)->modify('+1day');
@@ -201,7 +201,7 @@ class DashboardController extends JitsiAdminController
     {
         $servers = $serverUserManagment->getServersFromUser($this->getUser());
         if ($type === 'fixed') {
-            $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), $offset);
+            $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), $offset, true);
             return $this->render(
                 'dashboard/__lazyFixed.html.twig',
                 [

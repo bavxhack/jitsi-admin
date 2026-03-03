@@ -1,9 +1,9 @@
 <div class="card card-body mb-1 text-lg-start text-center mb-3">
     <div class="row">
         {% if roomIsReadOnly(room,app.user) == true %}
-            {% include 'dashboard/__roomInvisible.html.twig' with {'room':room} %}
+            {% include 'dashboard/__roomInvisible.html.twig' with {'room':room, 'showRoomStatus':false} %}
         {% else %}
-            {% include 'dashboard/__roomDetails.html.twig' with {'room':room} %}
+            {% include 'dashboard/__roomDetails.html.twig' with {'room':room, 'showRoomStatus':false} %}
             <div class="col-md-4 d-flex align-items-start justify-content-lg-start justify-content-center">
 
                 {% if isAllowedToOrganize(room,app.user) %}

@@ -90,6 +90,11 @@ class RoomsRepository extends ServiceEntityRepository
         return $qb->innerJoin('r.user', 'user')
             ->leftJoin('user.managerElement', 'managerelement')
             ->leftJoin('managerelement.deputy', 'deputy')
+            ->leftJoin('r.moderator', 'moderator')->addSelect('moderator')
+            ->leftJoin('r.creator', 'creator')->addSelect('creator')
+            ->leftJoin('r.server', 'server')->addSelect('server')
+            ->leftJoin('r.tag', 'tag')->addSelect('tag')
+            ->leftJoin('r.callerRoom', 'callerRoom')->addSelect('callerRoom')
             ->andWhere(
                 $qb->expr()->orX(
                     'user = :user',
@@ -101,7 +106,7 @@ class RoomsRepository extends ServiceEntityRepository
             ->andWhere($qb->expr()->orX($qb->expr()->isNull('r.persistantRoom'), 'r.persistantRoom = false'))
             ->setParameter('now', $now)
             ->setParameter('user', $user)
-            ->orderBy('r.start', 'DESC')
+            ->orderBy('r.startUtc', 'DESC')
             ->setMaxResults($this->amountperLayz)
             ->setFirstResult($this->amountperLayz * $offset)
             ->getQuery()
@@ -216,7 +221,7 @@ class RoomsRepository extends ServiceEntityRepository
      /**
       * @return Rooms[] Returns an array of Rooms objects
       */
-    public function getMyPersistantRooms(User $user, $offset)
+    public function getMyPersistantRooms(User $user, $offset = 0, bool $paginate = false)
     {
         $qb = $this->createQueryBuilder('rooms');
         $qb->innerJoin('rooms.user', 'user')
@@ -233,7 +238,15 @@ class RoomsRepository extends ServiceEntityRepository
                 )
             )
             ->setParameter('user', $user)
-            ->andWhere('rooms.persistantRoom = true');
+            ->andWhere('rooms.persistantRoom = true')
+            ->orderBy('rooms.startUtc', 'ASC');
+
+        if ($paginate) {
+            $qb
+                ->setMaxResults($this->amountperLayz)
+                ->setFirstResult($this->amountperLayz * $offset);
+        }
+
         return $qb->getQuery()->getResult();
     }
 
