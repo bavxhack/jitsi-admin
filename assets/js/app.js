@@ -32,6 +32,7 @@ import {initTabs, initalSetUnderline} from 'h2-invent-material-tabs'
 import {initDashboardnotification} from './dashBoardNotification'
 import {initChart} from './chart'
 import {Chart} from 'chart.js'
+import {initDashboardEnhancements} from './dashboardEnhancements'
 
 
 addEventListener('load', function () {
@@ -90,6 +91,7 @@ $(document).ready(function () {
     initGenerell();
 
     initRefreshDashboard(refreshDashboardTime, refreshDashboardUrl)
+    initDashboardEnhancements();
     initListSearch();
     initAjaxSend(confirmTitle, confirmCancel, confirmOk);
 
