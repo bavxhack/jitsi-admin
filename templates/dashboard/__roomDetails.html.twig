@@ -8,7 +8,7 @@
         <div class="occupant">
             <div class="number">
                 <small>
-                    {{ 'status.inconference.number'|trans( {'{number}' : RoomStatusOccupats(room)|length}) }}
+                    {{ 'status.inconference.number'|trans( {'{number}' : RoomStatusOccupantsCount(room)}) }}
 
                 </small>
                 <a tabindex="0"
@@ -16,7 +16,7 @@
                    data-mdb-trigger="focus"
                    data-mdb-html="true"
                    title="{{ 'status.inconference'|trans }}"
-                   data-mdb-content="{% for u in RoomStatusOccupats(room) %}{{ u.participantName }}<br>{% endfor %}"><i
+                   data-mdb-content="{% for name in RoomStatusOccupantsNames(room) %}{{ name }}<br>{% endfor %}"><i
                             class="fa fa-info-circle"></i>
                 </a>
             </div>
@@ -48,7 +48,7 @@
             <i class="fa-solid fa-file-contract me-1 createdByDeputy  {% if app.user == room.moderator %} loadContent{% endif %}"
                {% if app.user == room.moderator %} href="{{ path('app_change_log',{'room_id':room.id}) }}"{% endif %}
             ></i>{% endif %}
-            {% if room.uploadedRecordings|length > 0 %}
+            {% if dashboardHasUploadedRecordings(room) %}
                 <i class="loadContent fa-solid fa-film"></i>
             {% endif %}
 

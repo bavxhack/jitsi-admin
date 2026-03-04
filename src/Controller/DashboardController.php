@@ -130,6 +130,8 @@ class DashboardController extends JitsiAdminController
         ];
         $this->roomStatusFrontendService->preloadCreatedStatusForRooms($allRooms);
         $this->roomStatusFrontendService->preloadClosedStatusForRooms($allRooms);
+        $this->roomStatusFrontendService->preloadOccupantsCountForRooms($allRooms);
+        $this->roomStatusFrontendService->preloadOccupantsNamesForRooms($allRooms);
         $this->dashboardRoomMetaService->preloadRooms($allRooms);
         $servers = $serverUserManagment->getServersFromUser($this->getUser());
         $today = (new \DateTime('now'))->setTimezone(new \DateTimeZone($this->getUser()->getTimeZone()));
@@ -221,6 +223,8 @@ class DashboardController extends JitsiAdminController
             $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), $offset);
             $this->roomStatusFrontendService->preloadCreatedStatusForRooms($persistantRooms);
             $this->roomStatusFrontendService->preloadClosedStatusForRooms($persistantRooms);
+            $this->roomStatusFrontendService->preloadOccupantsCountForRooms($persistantRooms);
+            $this->roomStatusFrontendService->preloadOccupantsNamesForRooms($persistantRooms);
             $this->dashboardRoomMetaService->preloadRooms($persistantRooms);
             return $this->render(
                 'dashboard/__lazyFixed.html.twig',
@@ -234,6 +238,8 @@ class DashboardController extends JitsiAdminController
             $roomsPast = $this->doctrine->getRepository(Rooms::class)->findRoomsInPast($this->getUser(), $offset);
             $this->roomStatusFrontendService->preloadCreatedStatusForRooms($roomsPast);
             $this->roomStatusFrontendService->preloadClosedStatusForRooms($roomsPast);
+            $this->roomStatusFrontendService->preloadOccupantsCountForRooms($roomsPast);
+            $this->roomStatusFrontendService->preloadOccupantsNamesForRooms($roomsPast);
             $this->dashboardRoomMetaService->preloadRooms($roomsPast);
             return $this->render(
                 'dashboard/__lazyPast.html.twig',

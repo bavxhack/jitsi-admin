@@ -21,6 +21,16 @@ class RoomStatusFrontendService
      */
     private array $closedRoomStatusCache = [];
 
+    /**
+     * @var array<int, int>
+     */
+    private array $occupantsCountCache = [];
+
+    /**
+     * @var array<int, string[]>
+     */
+    private array $occupantsNamesCache = [];
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->em = $entityManager;
@@ -146,6 +156,113 @@ class RoomStatusFrontendService
             }
             $this->closedRoomStatusCache[$roomId] = $isClosed;
         }
+    }
+
+    /**
+     * @param Rooms[] $rooms
+     */
+    public function preloadOccupantsCountForRooms(array $rooms): void
+    {
+        $roomIds = [];
+        foreach ($rooms as $room) {
+            if (!$room instanceof Rooms || !$room->getId()) {
+                continue;
+            }
+
+            $roomId = $room->getId();
+            if (!array_key_exists($roomId, $this->occupantsCountCache)) {
+                $roomIds[] = $roomId;
+            }
+        }
+
+        $roomIds = array_values(array_unique($roomIds));
+        if ($roomIds === []) {
+            return;
+        }
+
+        $counts = $this->em->getRepository(RoomStatusParticipant::class)->findOccupantsCountByRoomIds($roomIds);
+        foreach ($roomIds as $roomId) {
+            $this->occupantsCountCache[$roomId] = $counts[$roomId] ?? 0;
+        }
+    }
+
+    /**
+     * @param Rooms[] $rooms
+     */
+    public function preloadOccupantsNamesForRooms(array $rooms): void
+    {
+        $roomIds = [];
+        foreach ($rooms as $room) {
+            if (!$room instanceof Rooms || !$room->getId()) {
+                continue;
+            }
+
+            $roomId = $room->getId();
+            if (!array_key_exists($roomId, $this->occupantsNamesCache)) {
+                $roomIds[] = $roomId;
+            }
+        }
+
+        $roomIds = array_values(array_unique($roomIds));
+        if ($roomIds === []) {
+            return;
+        }
+
+        $rows = $this->em->getConnection()->executeQuery(
+            'SELECT rs.room_id as room_id, rsp.participant_name as participant_name
+               FROM room_status_participant rsp
+               INNER JOIN room_status rs ON rs.id = rsp.room_status_id
+              WHERE rs.room_id IN (?)
+                AND rsp.in_room = 1
+                AND rs.destroyed IS NULL
+              ORDER BY rs.room_id ASC, rsp.participant_name ASC',
+            [$roomIds],
+            [\Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+        )->fetchAllAssociative();
+
+        foreach ($roomIds as $roomId) {
+            $this->occupantsNamesCache[$roomId] = [];
+        }
+
+        foreach ($rows as $row) {
+            $this->occupantsNamesCache[(int)$row['room_id']][] = (string)$row['participant_name'];
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public function occupantsNames(Rooms $rooms): array
+    {
+        if ($rooms->getId() && array_key_exists($rooms->getId(), $this->occupantsNamesCache)) {
+            return $this->occupantsNamesCache[$rooms->getId()];
+        }
+
+        $names = [];
+        foreach ($this->numberOfOccupants($rooms) as $occupant) {
+            $names[] = $occupant->getParticipantName();
+        }
+
+        if ($rooms->getId()) {
+            $this->occupantsNamesCache[$rooms->getId()] = $names;
+        }
+
+        return $names;
+    }
+
+    public function occupantsCount(Rooms $rooms): int
+    {
+        if ($rooms->getId() && array_key_exists($rooms->getId(), $this->occupantsCountCache)) {
+            return $this->occupantsCountCache[$rooms->getId()];
+        }
+
+        $parts = $this->numberOfOccupants($rooms);
+        $count = sizeof($parts);
+        if ($rooms->getId()) {
+            $this->occupantsCountCache[$rooms->getId()] = $count;
+        }
+
+        return $count;
     }
 
     public function numberOfOccupants(Rooms $rooms)
