@@ -27,6 +27,22 @@
 
 {% block body %}
 
+    <section class="dashboard-modern dashboard-intro mb-4">
+        <div class="dashboard-intro__content">
+            <p class="dashboard-intro__badge">Jitsi Admin = Meetling Basis</p>
+            <h2 class="dashboard-intro__title">Modern, hell und professionell – der volle Meetling-Funktionsumfang auf Jitsi-Admin-Basis.</h2>
+            <p class="dashboard-intro__text">
+                Jitsi Admin ist die technische Basis von Meetling. Das heißt: Ein Meetling baut auf einem
+                Jitsi Admin auf – und damit stehen hier ebenfalls die zentralen Meetling-Funktionen bereit:
+                DSGVO-konforme Meetings, kontrollierte Zugänge, souveräne Datenhaltung, flexible Serveranbindung
+                sowie eine klare Oberfläche für Teams und Administrator:innen.
+            </p>
+        </div>
+        <div class="dashboard-intro__glow" aria-hidden="true"></div>
+    </section>
+
+    <div class="dashboard-modern">
+
 
     <!-- Tabs navs -->
     <div class="d-block">
@@ -182,11 +198,16 @@
                     {% for r in persistantRooms %}
                         {% include 'dashboard/__roomCard.html.twig' with {'room':r} %}
                     {% endfor %}
+                    <div class="lazyLoad mb-3" data-target="{{ path('dashboard_lazy',{'type':'fixed','offset':1}) }}">
+                        <div class="fa-3x text-center text-black-50"><i class="fas fa-spinner fa-spin"></i></div>
+                    </div>
                 {% endif %}
             </div>
         </div>
     </div>
     <!-- Tabs content -->
+
+    </div>
 
 
 {% endblock %}
