@@ -247,9 +247,7 @@ class RoomsRepository extends ServiceEntityRepository
                 )
             )
             ->setParameter('user', $user)
-            ->andWhere('rooms.persistantRoom = true')
-            ->setMaxResults($this->amountperLayz)
-            ->setFirstResult($this->amountperLayz * $offset);
+            ->andWhere('rooms.persistantRoom = true');
         return $qb->getQuery()->getResult();
     }
 
