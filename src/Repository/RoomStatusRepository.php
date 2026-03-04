@@ -84,4 +84,27 @@ class RoomStatusRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @param int[] $roomIds
+     * @return int[]
+     */
+    public function findCreatedRoomIdsByRoomIds(array $roomIds): array
+    {
+        if ($roomIds === []) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('roomStatus');
+
+        $rows = $qb->select('IDENTITY(roomStatus.room) as roomId')
+            ->andWhere($qb->expr()->isNull('roomStatus.destroyed'))
+            ->andWhere($qb->expr()->in('roomStatus.room', ':roomIds'))
+            ->setParameter('roomIds', $roomIds)
+            ->groupBy('roomStatus.room')
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_map(static fn (array $row): int => (int)$row['roomId'], $rows);
+    }
 }

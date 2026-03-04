@@ -112,10 +112,10 @@
                     aria-labelledby="ex1-tab-1"
             >
 
-                {% if myScheduledMeeting(app.user)|length > 0 %}
+                {% if scheduledMeetings|length > 0 %}
 
                     <h4 style="padding-top: 16px" class="h4-responsive pl-xl-3"> {{ 'Einen Termin finden'|trans }}</h4>
-                    {% for r in myScheduledMeeting(app.user) %}
+                    {% for r in scheduledMeetings %}
                         {% include 'dashboard/__roomCard.html.twig' with {'room':r} %}
                     {% endfor %}
                 {% endif %}
@@ -183,6 +183,9 @@
                         {% include 'dashboard/__roomCard.html.twig' with {'room':r} %}
                     {% endfor %}
                 {% endif %}
+                <div class="lazyLoad mb-3" data-target="{{ path('dashboard_lazy',{'type':'fixed','offset':1}) }}">
+                    <div class="fa-3x text-center text-black-50"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
             </div>
         </div>
     </div>
