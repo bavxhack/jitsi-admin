@@ -32,13 +32,13 @@
 
 {% if dropdown_settings_mail_to_all == 1 %}
     <li><a class="dropdown-item"
-           href="mailto:?bcc={% for u in room.user %}{{ u.email }}{% if not loop.last %};{% endif %}{% endfor %}">
+           href="mailto:?bcc={{ dashboardMailTo(room) }}">
             <i class="fa fa-envelope"></i>
             {{ 'Mail an die Teilnehmer'|trans }}</a></li>
 {% endif %}
 
 {% if dropdown_settings_generate_report == 1 %}
-    <li><a class="dropdown-item loadContent {% if room.roomstatuses|length == 0 %}disabled{% endif %}"
+    <li><a class="dropdown-item loadContent {% if not dashboardHasReportData(room) %}disabled{% endif %}"
            href="{{ path('app_report_create',{'id':room.id}) }}">
             <i class="fa-solid fa-timeline"></i>
             {{ 'report.dropdown.item'|trans }}</a>

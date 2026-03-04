@@ -15,6 +15,7 @@ use App\Form\Type\SecondEmailType;
 use App\Helper\JitsiAdminController;
 use App\Repository\ServerRepository;
 use App\Service\analytics\AnalyticsService;
+use App\Service\DashboardRoomMetaService;
 use App\Service\FavoriteService;
 use App\Service\ServerUserManagment;
 use App\Service\TermsAndConditions\TermsAndConditionsService;
@@ -47,6 +48,7 @@ class DashboardController extends JitsiAdminController
         private ThemeService $themeService,
         private ServerRepository $serverRepository,
         private RoomStatusFrontendService $roomStatusFrontendService,
+        private DashboardRoomMetaService $dashboardRoomMetaService,
     )
     {
         parent::__construct($managerRegistry, $translator, $logger, $parameterBag);
@@ -127,6 +129,8 @@ class DashboardController extends JitsiAdminController
             ...$favorites,
         ];
         $this->roomStatusFrontendService->preloadCreatedStatusForRooms($allRooms);
+        $this->roomStatusFrontendService->preloadClosedStatusForRooms($allRooms);
+        $this->dashboardRoomMetaService->preloadRooms($allRooms);
         $servers = $serverUserManagment->getServersFromUser($this->getUser());
         $today = (new \DateTime('now'))->setTimezone(new \DateTimeZone($this->getUser()->getTimeZone()));
         $tomorrow = (clone $today)->modify('+1day');
@@ -216,6 +220,8 @@ class DashboardController extends JitsiAdminController
         if ($type === 'fixed') {
             $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), $offset);
             $this->roomStatusFrontendService->preloadCreatedStatusForRooms($persistantRooms);
+            $this->roomStatusFrontendService->preloadClosedStatusForRooms($persistantRooms);
+            $this->dashboardRoomMetaService->preloadRooms($persistantRooms);
             return $this->render(
                 'dashboard/__lazyFixed.html.twig',
                 [
@@ -227,6 +233,8 @@ class DashboardController extends JitsiAdminController
         } elseif ($type === 'past') {
             $roomsPast = $this->doctrine->getRepository(Rooms::class)->findRoomsInPast($this->getUser(), $offset);
             $this->roomStatusFrontendService->preloadCreatedStatusForRooms($roomsPast);
+            $this->roomStatusFrontendService->preloadClosedStatusForRooms($roomsPast);
+            $this->dashboardRoomMetaService->preloadRooms($roomsPast);
             return $this->render(
                 'dashboard/__lazyPast.html.twig',
                 [
