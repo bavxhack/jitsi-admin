@@ -15,10 +15,12 @@ use App\Form\Type\SecondEmailType;
 use App\Helper\JitsiAdminController;
 use App\Repository\ServerRepository;
 use App\Service\analytics\AnalyticsService;
+use App\Service\DashboardRoomMetaService;
 use App\Service\FavoriteService;
 use App\Service\ServerUserManagment;
 use App\Service\TermsAndConditions\TermsAndConditionsService;
 use App\Service\ThemeService;
+use App\Service\webhook\RoomStatusFrontendService;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -45,6 +47,8 @@ class DashboardController extends JitsiAdminController
         ParameterBagInterface $parameterBag,
         private ThemeService $themeService,
         private ServerRepository $serverRepository,
+        private RoomStatusFrontendService $roomStatusFrontendService,
+        private DashboardRoomMetaService $dashboardRoomMetaService,
     )
     {
         parent::__construct($managerRegistry, $translator, $logger, $parameterBag);
@@ -81,8 +85,8 @@ class DashboardController extends JitsiAdminController
         }
 
         $roomsFuture = $this->doctrine->getRepository(Rooms::class)->findRoomsInFuture($this->getUser());
+        $scheduledMeetings = $this->doctrine->getRepository(Rooms::class)->getMyScheduledRooms($this->getUser());
 
-        $r = [];
         $future = [];
         foreach ($roomsFuture as $data) {
             $future[$data->getStartwithTimeZone($this->getUser())->format('Ymd')][] = $data;
@@ -114,10 +118,25 @@ class DashboardController extends JitsiAdminController
         $roomsNow = $this->doctrine->getRepository(Rooms::class)->findRuningRooms($this->getUser());
         $roomsToday = $this->doctrine->getRepository(Rooms::class)->findTodayRooms($this->getUser());
         $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), 0);
+        $favorites = $this->doctrine->getRepository(Rooms::class)->findFavoriteRooms($this->getUser());
+        $allRooms = [
+            ...$scheduledMeetings,
+            ...$roomsFuture,
+            ...$roomsPast,
+            ...$roomsNow,
+            ...$roomsToday,
+            ...$persistantRooms,
+            ...$favorites,
+        ];
+        $this->roomStatusFrontendService->preloadCreatedStatusForRooms($allRooms);
+        $this->roomStatusFrontendService->preloadClosedStatusForRooms($allRooms);
+        $openRooms = array_values(array_filter($allRooms, fn (Rooms $room): bool => $this->roomStatusFrontendService->isRoomCreated($room)));
+        $this->roomStatusFrontendService->preloadOccupantsCountForRooms($openRooms);
+        $this->roomStatusFrontendService->preloadOccupantsNamesForRooms($openRooms);
+        $this->dashboardRoomMetaService->preloadRooms($allRooms);
         $servers = $serverUserManagment->getServersFromUser($this->getUser());
         $today = (new \DateTime('now'))->setTimezone(new \DateTimeZone($this->getUser()->getTimeZone()));
         $tomorrow = (clone $today)->modify('+1day');
-        $favorites = $this->doctrine->getRepository(Rooms::class)->findFavoriteRooms($this->getUser());
         $timer = $stopwatch->stop('dashboard');
         if ($request->get('snack')) {
             if ($request->get('color')) {
@@ -141,6 +160,7 @@ class DashboardController extends JitsiAdminController
             [
                 'secondEmailForm' => $form->createView(),
                 'roomsFuture' => $future,
+                'scheduledMeetings' => $scheduledMeetings,
                 'roomsPast' => $roomsPast,
                 'runningRooms' => $roomsNow,
                 'persistantRooms' => $persistantRooms,
@@ -202,6 +222,12 @@ class DashboardController extends JitsiAdminController
         $servers = $serverUserManagment->getServersFromUser($this->getUser());
         if ($type === 'fixed') {
             $persistantRooms = $this->doctrine->getRepository(Rooms::class)->getMyPersistantRooms($this->getUser(), $offset);
+            $this->roomStatusFrontendService->preloadCreatedStatusForRooms($persistantRooms);
+            $this->roomStatusFrontendService->preloadClosedStatusForRooms($persistantRooms);
+            $openRooms = array_values(array_filter($persistantRooms, fn (Rooms $room): bool => $this->roomStatusFrontendService->isRoomCreated($room)));
+            $this->roomStatusFrontendService->preloadOccupantsCountForRooms($openRooms);
+            $this->roomStatusFrontendService->preloadOccupantsNamesForRooms($openRooms);
+            $this->dashboardRoomMetaService->preloadRooms($persistantRooms);
             return $this->render(
                 'dashboard/__lazyFixed.html.twig',
                 [
@@ -212,6 +238,12 @@ class DashboardController extends JitsiAdminController
             );
         } elseif ($type === 'past') {
             $roomsPast = $this->doctrine->getRepository(Rooms::class)->findRoomsInPast($this->getUser(), $offset);
+            $this->roomStatusFrontendService->preloadCreatedStatusForRooms($roomsPast);
+            $this->roomStatusFrontendService->preloadClosedStatusForRooms($roomsPast);
+            $openRooms = array_values(array_filter($roomsPast, fn (Rooms $room): bool => $this->roomStatusFrontendService->isRoomCreated($room)));
+            $this->roomStatusFrontendService->preloadOccupantsCountForRooms($openRooms);
+            $this->roomStatusFrontendService->preloadOccupantsNamesForRooms($openRooms);
+            $this->dashboardRoomMetaService->preloadRooms($roomsPast);
             return $this->render(
                 'dashboard/__lazyPast.html.twig',
                 [

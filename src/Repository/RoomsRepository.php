@@ -30,6 +30,14 @@ class RoomsRepository extends ServiceEntityRepository
         $this->timeZoneService = $timeZoneService;
     }
 
+
+    private function addDashboardPreloadJoins($qb, string $roomAlias = 'r'): void
+    {
+        $qb->leftJoin($roomAlias . '.repeater', 'dashboardRepeater')->addSelect('dashboardRepeater')
+            ->leftJoin($roomAlias . '.callerRoom', 'dashboardCallerRoom')->addSelect('dashboardCallerRoom');
+    }
+
+
     // /**
     //  * @return Rooms[] Returns an array of Rooms objects
     //  */
@@ -63,6 +71,7 @@ class RoomsRepository extends ServiceEntityRepository
         $now = new \DateTime('now', $this->timeZoneService->getTimeZone($user));
         $now->setTimezone(new \DateTimeZone('utc'));
         $qb = $this->createQueryBuilder('r');
+        $this->addDashboardPreloadJoins($qb, 'r');
         return $qb->innerJoin('r.user', 'user')
             ->leftJoin('user.managerElement', 'managerelement')
             ->leftJoin('managerelement.deputy', 'deputy')
@@ -87,6 +96,7 @@ class RoomsRepository extends ServiceEntityRepository
         $now = new \DateTime('now', $this->timeZoneService->getTimeZone($user));
         $now->setTimezone(new \DateTimeZone('utc'));
         $qb = $this->createQueryBuilder('r');
+        $this->addDashboardPreloadJoins($qb, 'r');
         return $qb->innerJoin('r.user', 'user')
             ->leftJoin('user.managerElement', 'managerelement')
             ->leftJoin('managerelement.deputy', 'deputy')
@@ -135,6 +145,7 @@ class RoomsRepository extends ServiceEntityRepository
         $now = new \DateTime('now', $this->timeZoneService->getTimeZone($user));
         $now->setTimezone(new \DateTimeZone('utc'));
         $qb = $this->createQueryBuilder('r');
+        $this->addDashboardPreloadJoins($qb, 'r');
         return $qb->innerJoin('r.user', 'user')
             ->leftJoin('user.managerElement', 'managerelement')
             ->leftJoin('managerelement.deputy', 'deputy')
@@ -161,6 +172,7 @@ class RoomsRepository extends ServiceEntityRepository
         $midnight = new \DateTime();
         $midnight->setTime(23, 59, 59);
         $qb = $this->createQueryBuilder('r');
+        $this->addDashboardPreloadJoins($qb, 'r');
 
         return $qb
             ->innerJoin('r.user', 'user')
@@ -194,6 +206,7 @@ class RoomsRepository extends ServiceEntityRepository
     public function getMyScheduledRooms(User $user)
     {
         $qb = $this->createQueryBuilder('rooms');
+        $this->addDashboardPreloadJoins($qb, 'rooms');
         $qb->innerJoin('rooms.user', 'user')
             ->leftJoin('rooms.moderator', 'moderator')
             ->leftJoin('moderator.managerElement', 'managerelement')
@@ -219,6 +232,7 @@ class RoomsRepository extends ServiceEntityRepository
     public function getMyPersistantRooms(User $user, $offset)
     {
         $qb = $this->createQueryBuilder('rooms');
+        $this->addDashboardPreloadJoins($qb, 'rooms');
         $qb->innerJoin('rooms.user', 'user')
             ->leftJoin('rooms.moderator', 'moderator')
             ->leftJoin('moderator.managerElement', 'managerelement')
@@ -257,6 +271,7 @@ class RoomsRepository extends ServiceEntityRepository
     public function findFavoriteRooms(User $user)
     {
         $qb = $this->createQueryBuilder('r');
+        $this->addDashboardPreloadJoins($qb, 'r');
         return $qb->innerJoin('r.favoriteUsers', 'user')
             ->andWhere(
                 $qb->expr()->orX(

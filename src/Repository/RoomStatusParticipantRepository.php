@@ -109,4 +109,34 @@ class RoomStatusParticipantRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param int[] $roomIds
+     * @return array<int, int>
+     */
+    public function findOccupantsCountByRoomIds(array $roomIds): array
+    {
+        if ($roomIds === []) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('participant');
+        $rows = $qb->select('IDENTITY(roomStatus.room) as roomId, COUNT(participant.id) as occupantsCount')
+            ->innerJoin('participant.roomStatus', 'roomStatus')
+            ->andWhere($qb->expr()->in('roomStatus.room', ':roomIds'))
+            ->andWhere('participant.inRoom = true')
+            ->andWhere($qb->expr()->isNull('roomStatus.destroyed'))
+            ->groupBy('roomStatus.room')
+            ->setParameter('roomIds', $roomIds)
+            ->getQuery()
+            ->getScalarResult();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[(int)$row['roomId']] = (int)$row['occupantsCount'];
+        }
+
+        return $result;
+    }
+
 }

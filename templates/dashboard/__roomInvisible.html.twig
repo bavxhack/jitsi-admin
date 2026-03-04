@@ -4,7 +4,7 @@
     {% if RoomStatusOpen(room) == true %}
         <div class="occupant">
             <div class="number">
-                <small>{{ 'status.inconference.number'|trans( {'{number}' : RoomStatusOccupats(room)|length}) }}</small>
+                <small>{{ 'status.inconference.number'|trans( {'{number}' : RoomStatusOccupantsCount(room)}) }}</small>
             </div>
             <div class="text">
                 {{ 'status.inconference'|trans }}
@@ -38,7 +38,7 @@
     <p class="text-black-50 small">
         {{ 'Geplant von'|trans }}: {{ nameOfUserwithFormat(room.moderator, laf_showNameFrontend) }}<br>
         {{ 'Anzahl Eingeladene'|trans }}
-        : {% if room.public and room.maxParticipants is not null %}{% trans with {'{from}':room.user|length, '{to}':room.maxParticipants} %}{from} von {to}{% endtrans %}{% else %}{{ room.user|length }}{% endif %}
+        : {% if room.public and room.maxParticipants is not null %}{% trans with {'{from}':dashboardInvitedCount(room), '{to}':room.maxParticipants} %}{from} von {to}{% endtrans %}{% else %}{{ dashboardInvitedCount(room) }}{% endif %}
         <br>
         {% if  getApplicationProperties('allowTimeZoneSwitch') == 1 and room.persistantRoom == false %}
             {{ 'Erstellt in Zeitzone'|trans }}: {{ room.timeZoneAuto }}

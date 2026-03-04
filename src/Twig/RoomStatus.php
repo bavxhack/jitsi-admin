@@ -39,6 +39,8 @@ class RoomStatus extends AbstractExtension
             new TwigFunction('RoomStatusOpen', [$this, 'RoomStatusOpen']),
             new TwigFunction('RoomStatusOccupats', [$this, 'RoomStatusOccupats']),
             new TwigFunction('RoomStatusClosed', [$this, 'RoomStatusClosed']),
+            new TwigFunction('RoomStatusOccupantsCount', [$this, 'RoomStatusOccupantsCount']),
+            new TwigFunction('RoomStatusOccupantsNames', [$this, 'RoomStatusOccupantsNames']),
         ];
     }
 
@@ -55,5 +57,18 @@ class RoomStatus extends AbstractExtension
     public function RoomStatusClosed(Rooms $rooms)
     {
         return $this->webhookFrontend->isRoomClosed($rooms);
+    }
+
+    public function RoomStatusOccupantsCount(Rooms $rooms): int
+    {
+        return $this->webhookFrontend->occupantsCount($rooms);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function RoomStatusOccupantsNames(Rooms $rooms): array
+    {
+        return $this->webhookFrontend->occupantsNames($rooms);
     }
 }
